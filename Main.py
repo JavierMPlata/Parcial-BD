@@ -1,6 +1,8 @@
 from Extract.StockExtract import StockExtract
 from Transform.StockTransform import StockTransform
+from Transform.GraphicsTransform import GraphicsTransform
 from Load.StockLoad import Loader
+from Load.GraphicsLoad import GraphicsLoad
 from Config.Config import Config
 
 def main():
@@ -67,6 +69,37 @@ def main():
         sentiment_dist = cleaned_data['Label'].value_counts()
         print(f"   • Sentimiento Negativo (0): {sentiment_dist.get(0, 0):,} registros")
         print(f"   • Sentimiento Positivo (1): {sentiment_dist.get(1, 0):,} registros")
+        
+        # 4. GENERACIÓN DE GRÁFICAS
+        print("\n" + "PASO 4: GENERANDO GRÁFICAS DE ANÁLISIS...")
+        print("=" * 60)
+        
+        try:
+            # Crear transformer para gráficas
+            graphics_transformer = GraphicsTransform(cleaned_data)
+            
+            # Crear loader para gráficas
+            graphics_loader = GraphicsLoad()
+            
+            # Generar y guardar todas las gráficas
+            saved_files = graphics_loader.save_all_graphics(graphics_transformer)
+            
+            # Crear reporte
+            report_path = graphics_loader.create_graphics_report(saved_files)
+            
+            print(f"\n📈 GRÁFICAS GENERADAS:")
+            for name, path in saved_files.items():
+                if path:
+                    print(f"   • {name.replace('_', ' ').title()}: ✓")
+                else:
+                    print(f"   • {name.replace('_', ' ').title()}: ✗")
+            
+            if report_path:
+                print(f"\n📄 Reporte detallado: {report_path}")
+                
+        except Exception as e:
+            print(f"⚠️  Error generando gráficas: {str(e)}")
+            print("El proceso ETL continuó exitosamente, pero las gráficas no se pudieron generar.")
         
         print("\n" + "="*60)
         
